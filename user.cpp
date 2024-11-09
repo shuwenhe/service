@@ -10,8 +10,10 @@ Json::Value get_user_data(){
 
 	conn = mysql_init(NULL);
 	if(!mysql_real_connect(conn,"39.107.59.4","shuwen","Shuwen@_00..","shuwen",33061,NULL,0)){
-		std::cerr<<"error connecting to database:"<<mysql_error(conn)<<std::endl;
-		return 1;
+		Json::Value error_json;
+		error_json["status"] = "error";
+		error_json["message"] = "Error connecting to database:" + std::string(mysql_error(conn));
+		return error_json;
 	}
 
 	if(mysql_query(conn,"SELECT id, username, password, phone, created_at, updated_at FROM shuwen.`user`;")){
@@ -32,8 +34,8 @@ Json::Value get_user_data(){
 		user["updated_at"] = row[5]?row[5]:"";
 		user.append(user);
 	}
-	jsonData["status"] = "success";
-	jsonData["data"] = user;
+	json_data["status"] = "success";
+	json_data["data"] = user;
 
 	mysql_free_result(res);
 	mysql_close(conn);
