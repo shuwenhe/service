@@ -44,6 +44,8 @@ Json::Value get_user_data(){
 }
 
 int main(){
+	httplib::Server svr;
+	svr.Get("/getUserData",[](const httplib::Request& req,httplib::Response& res));
 	Json::Value data = get_user_data();
 	std::cout<<data.toStyledString()<<std::endl;
 
