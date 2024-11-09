@@ -3,7 +3,7 @@
 #include <json/json.h>
 
 Json::Value get_user_data(){
-	Json::Value json_data
+	Json::Value result;
 	MYSQL *conn;
 	MYSQL_RES *res;
 	MYSQL_ROW row;
@@ -23,7 +23,7 @@ Json::Value get_user_data(){
 
 	res = mysql_use_result(conn);
 
-	Json::Value user(Json::arrayValue);
+	Json::Value users(Json::arrayValue);
 	while((row = mysql_fetch_row(res)) != NULL){
 		Json::Value user;
 		user["id"] = row[0]?row[0]:"";
@@ -32,15 +32,15 @@ Json::Value get_user_data(){
 		user["phone"] = row[3]?row[3]:"";
 		user["created_at"] = row[4]?row[4]:"";
 		user["updated_at"] = row[5]?row[5]:"";
-		user.append(user);
+		users.append(user);
 	}
-	json_data["status"] = "success";
-	json_data["data"] = user;
+	result["status"] = "success";
+	result["data"] = users;
 
 	mysql_free_result(res);
 	mysql_close(conn);
 
-	return json_data;
+	return result;
 }
 
 int main(){
