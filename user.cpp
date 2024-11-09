@@ -1,7 +1,7 @@
 #include <iostream>
 #include <mysql/mysql.h>
 #include <json/json.h>
-#include "config.h"
+#include "cnf.h"
 
 Json::Value get_user_data(){
 	Json::Value result;
