@@ -1,6 +1,7 @@
 #include <iostream>
 #include <mysql/mysql.h>
 #include <json/json.h>
+#include "config.h"
 
 Json::Value get_user_data(){
 	Json::Value result;
@@ -9,7 +10,7 @@ Json::Value get_user_data(){
 	MYSQL_ROW row;
 
 	conn = mysql_init(NULL);
-	if(!mysql_real_connect(conn,"39.107.59.4","shuwen","Shuwen@_00..","shuwen",33061,NULL,0)){
+	if(!mysql_real_connect(conn,host,user,pwd,db,port,NULL,0)){
 		Json::Value error_json;
 		error_json["status"] = "error";
 		error_json["message"] = "Error connecting to database:" + std::string(mysql_error(conn));
@@ -44,8 +45,8 @@ Json::Value get_user_data(){
 }
 
 int main(){
-	httplib::Server svr;
-	svr.Get("/getUserData",[](const httplib::Request& req,httplib::Response& res));
+	//httplib::Server svr;
+	//svr.Get("/getUserData",[](const httplib::Request& req,httplib::Response& res));
 	Json::Value data = get_user_data();
 	std::cout<<data.toStyledString()<<std::endl;
 
