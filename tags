@@ -1,0 +1,13 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.9~svn20110310	//
+PORT	index.cpp	/^const int PORT = 8080;$/;"	v
+get_user_data	user.cpp	/^Json::Value get_user_data(){$/;"	f
+loadWebPages	index.cpp	/^void loadWebPages() {$/;"	f
+main	index.cpp	/^int main() {$/;"	f
+main	user.cpp	/^int main(){$/;"	f
+servePage	index.cpp	/^void servePage(int client_socket, const std::string& page_path) {$/;"	f
+web_pages	index.cpp	/^std::map<std::string, std::string> web_pages;$/;"	v
