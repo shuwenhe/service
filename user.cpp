@@ -1,6 +1,10 @@
 #include <iostream>
 #include <mysql/mysql.h>
 
+Json::Value get_user_data(){
+
+}
+
 int main(){
 	MYSQL *conn;
 	MYSQL_RES *res;
