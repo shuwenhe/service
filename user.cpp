@@ -2,6 +2,7 @@
 #include <mysql/mysql.h>
 #include <json/json.h>
 #include "cnf.h"
+#include "httplib.h"
 
 Json::Value get_user_data(){
 	Json::Value result;
@@ -46,9 +47,13 @@ Json::Value get_user_data(){
 
 int main(){
 	httplib::Server svr;
-	svr.Get("/getUserData",[](const httplib::Request& req,httplib::Response& res));
-	Json::Value data = get_user_data();
-	std::cout<<data.toStyledString()<<std::endl;
+	svr.Get("/getUserData",[](const httplib::Request& req,httplib::Response& res){
+			Json::Value data = get_user_data();
+			res.set_content(data.toStyledString(),"application/json");
+	});
+	std::cout<<"Server started at http://localhost:8080"<<std::endl;
+	svr.listen("0.0.0.0",8080);
+	//std::cout<<data.toStyledString()<<std::endl;
 
 	return 0;
 }
