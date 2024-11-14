@@ -38,6 +38,7 @@ Json::Value get_user_data(){
 	}
 	result["status"] = "success";
 	result["data"] = users;
+	std::cout << "Generated JSON: " << result.toStyledString() << std::endl;
 
 	mysql_free_result(res);
 	mysql_close(conn);
@@ -53,7 +54,6 @@ int main(){
 	});
 	std::cout<<"Server started at http://localhost:8080"<<std::endl;
 	svr.listen("0.0.0.0",8080);
-	//std::cout<<data.toStyledString()<<std::endl;
 
 	return 0;
 }
