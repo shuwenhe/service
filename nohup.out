@@ -3,3 +3,284 @@ Error: Unable to bind.
 Server is running on port 8080
 Server started at http://localhost:8080
 Server started at http://localhost:8080
+Generated JSON: {
+	"data" : 
+	[
+		{
+			"created_at" : "2024-11-08 09:41:38",
+			"id" : "1",
+			"password" : "123456",
+			"phone" : "15010729356",
+			"updated_at" : "2024-11-08 11:41:38",
+			"username" : "shuwen"
+		},
+		{
+			"created_at" : "2024-11-09 09:41:38",
+			"id" : "2",
+			"password" : "123456",
+			"phone" : "13811457255",
+			"updated_at" : "2024-11-09 11:41:38",
+			"username" : "richard"
+		},
+		{
+			"created_at" : "2024-11-20 09:41:38",
+			"id" : "3",
+			"password" : "123456",
+			"phone" : "15383327771",
+			"updated_at" : "2024-11-20 09:41:38",
+			"username" : "ritchie"
+		}
+	],
+	"status" : "success"
+}
+
+Generated JSON: {
+	"data" : 
+	[
+		{
+			"created_at" : "2024-11-08 09:41:38",
+			"id" : "1",
+			"password" : "123456",
+			"phone" : "15010729356",
+			"updated_at" : "2024-11-08 11:41:38",
+			"username" : "shuwen"
+		},
+		{
+			"created_at" : "2024-11-09 09:41:38",
+			"id" : "2",
+			"password" : "123456",
+			"phone" : "13811457255",
+			"updated_at" : "2024-11-09 11:41:38",
+			"username" : "richard"
+		},
+		{
+			"created_at" : "2024-11-20 09:41:38",
+			"id" : "3",
+			"password" : "123456",
+			"phone" : "15383327771",
+			"updated_at" : "2024-11-20 09:41:38",
+			"username" : "ritchie"
+		}
+	],
+	"status" : "success"
+}
+
+Generated JSON: {
+	"data" : 
+	[
+		{
+			"created_at" : "2024-11-08 09:41:38",
+			"id" : "1",
+			"password" : "123456",
+			"phone" : "15010729356",
+			"updated_at" : "2024-11-08 11:41:38",
+			"username" : "shuwen"
+		},
+		{
+			"created_at" : "2024-11-09 09:41:38",
+			"id" : "2",
+			"password" : "123456",
+			"phone" : "13811457255",
+			"updated_at" : "2024-11-09 11:41:38",
+			"username" : "richard"
+		},
+		{
+			"created_at" : "2024-11-20 09:41:38",
+			"id" : "3",
+			"password" : "123456",
+			"phone" : "15383327771",
+			"updated_at" : "2024-11-20 09:41:38",
+			"username" : "ritchie"
+		}
+	],
+	"status" : "success"
+}
+
+Generated JSON: {
+	"data" : 
+	[
+		{
+			"created_at" : "2024-11-08 09:41:38",
+			"id" : "1",
+			"password" : "123456",
+			"phone" : "15010729356",
+			"updated_at" : "2024-11-08 11:41:38",
+			"username" : "shuwen"
+		},
+		{
+			"created_at" : "2024-11-09 09:41:38",
+			"id" : "2",
+			"password" : "123456",
+			"phone" : "13811457255",
+			"updated_at" : "2024-11-09 11:41:38",
+			"username" : "richard"
+		},
+		{
+			"created_at" : "2024-11-20 09:41:38",
+			"id" : "3",
+			"password" : "123456",
+			"phone" : "15383327771",
+			"updated_at" : "2024-11-20 09:41:38",
+			"username" : "ritchie"
+		}
+	],
+	"status" : "success"
+}
+
+Generated JSON: {
+	"data" : 
+	[
+		{
+			"created_at" : "2024-11-08 09:41:38",
+			"id" : "1",
+			"password" : "123456",
+			"phone" : "15010729356",
+			"updated_at" : "2024-11-08 11:41:38",
+			"username" : "shuwen"
+		},
+		{
+			"created_at" : "2024-11-09 09:41:38",
+			"id" : "2",
+			"password" : "123456",
+			"phone" : "13811457255",
+			"updated_at" : "2024-11-09 11:41:38",
+			"username" : "richard"
+		},
+		{
+			"created_at" : "2024-11-20 09:41:38",
+			"id" : "3",
+			"password" : "123456",
+			"phone" : "15383327771",
+			"updated_at" : "2024-11-20 09:41:38",
+			"username" : "ritchie"
+		}
+	],
+	"status" : "success"
+}
+
+Generated JSON: {
+	"data" : 
+	[
+		{
+			"created_at" : "2024-11-08 09:41:38",
+			"id" : "1",
+			"password" : "123456",
+			"phone" : "15010729356",
+			"updated_at" : "2024-11-08 11:41:38",
+			"username" : "shuwen"
+		},
+		{
+			"created_at" : "2024-11-09 09:41:38",
+			"id" : "2",
+			"password" : "123456",
+			"phone" : "13811457255",
+			"updated_at" : "2024-11-09 11:41:38",
+			"username" : "richard"
+		},
+		{
+			"created_at" : "2024-11-20 09:41:38",
+			"id" : "3",
+			"password" : "123456",
+			"phone" : "15383327771",
+			"updated_at" : "2024-11-20 09:41:38",
+			"username" : "ritchie"
+		}
+	],
+	"status" : "success"
+}
+
+Server started at http://localhost:8080
+Generated JSON: {
+	"data" : 
+	[
+		{
+			"created_at" : "2024-11-08 09:41:38",
+			"id" : "1",
+			"password" : "123456",
+			"phone" : "15010729356",
+			"updated_at" : "2024-11-08 11:41:38",
+			"username" : "shuwen"
+		},
+		{
+			"created_at" : "2024-11-09 09:41:38",
+			"id" : "2",
+			"password" : "123456",
+			"phone" : "13811457255",
+			"updated_at" : "2024-11-09 11:41:38",
+			"username" : "richard"
+		},
+		{
+			"created_at" : "2024-11-20 09:41:38",
+			"id" : "3",
+			"password" : "123456",
+			"phone" : "15383327771",
+			"updated_at" : "2024-11-20 09:41:38",
+			"username" : "ritchie"
+		}
+	],
+	"status" : "success"
+}
+
+Generated JSON: {
+	"data" : 
+	[
+		{
+			"created_at" : "2024-11-08 09:41:38",
+			"id" : "1",
+			"password" : "123456",
+			"phone" : "15010729356",
+			"updated_at" : "2024-11-08 11:41:38",
+			"username" : "shuwen"
+		},
+		{
+			"created_at" : "2024-11-09 09:41:38",
+			"id" : "2",
+			"password" : "123456",
+			"phone" : "13811457255",
+			"updated_at" : "2024-11-09 11:41:38",
+			"username" : "richard"
+		},
+		{
+			"created_at" : "2024-11-20 09:41:38",
+			"id" : "3",
+			"password" : "123456",
+			"phone" : "15383327771",
+			"updated_at" : "2024-11-20 09:41:38",
+			"username" : "ritchie"
+		}
+	],
+	"status" : "success"
+}
+
+Generated JSON: {
+	"data" : 
+	[
+		{
+			"created_at" : "2024-11-08 09:41:38",
+			"id" : "1",
+			"password" : "123456",
+			"phone" : "15010729356",
+			"updated_at" : "2024-11-08 11:41:38",
+			"username" : "shuwen"
+		},
+		{
+			"created_at" : "2024-11-09 09:41:38",
+			"id" : "2",
+			"password" : "123456",
+			"phone" : "13811457255",
+			"updated_at" : "2024-11-09 11:41:38",
+			"username" : "richard"
+		},
+		{
+			"created_at" : "2024-11-20 09:41:38",
+			"id" : "3",
+			"password" : "123456",
+			"phone" : "15383327771",
+			"updated_at" : "2024-11-20 09:41:38",
+			"username" : "ritchie"
+		}
+	],
+	"status" : "success"
+}
+
+Server started at http://localhost:8080
