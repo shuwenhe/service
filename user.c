@@ -21,7 +21,7 @@ struct json_object* get_user_data() {
 
     if (mysql_query(conn, "SELECT id, username, password, phone, created_at, updated_at FROM shuwen.`user`;")) {
         fprintf(stderr, "error query database: %s\n", mysql_error(conn));
-        return NULL; // Handle error appropriately
+        return NULL;
     }
 
     res = mysql_store_result(conn);
@@ -57,7 +57,7 @@ int main() {
         struct json_object *data = get_user_data();
         const char *json_str = json_object_to_json_string(data);
         res.set_content(json_str, "application/json");
-        json_object_put(data); // Decrement the reference count of the JSON object
+        json_object_put(data);
     });
 
     printf("Server started at http://localhost:8080\n");
