@@ -54,7 +54,6 @@ int main(){
 	});
 	std::cout<<"Server started at http://localhost:8080"<<std::endl;
 	svr.listen("0.0.0.0",8080);
-
 	return 0;
 }
 
