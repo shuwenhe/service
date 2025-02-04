@@ -20,7 +20,7 @@ Json::Value get_user_data(){
 		return error_json;
 	}
 
-	if(mysql_query(conn,"SELECT id, username, password, phone, created_at, updated_at FROM shuwen.`user`;")){
+	if(mysql_query(conn,"SELECT id, username, password, phone, created_at, updated_at FROM crmeb_merchant.`user`;")){
 		std::cerr<<"error query database:"<<mysql_error(conn)<<std::endl;
 		return 1;
 	}
