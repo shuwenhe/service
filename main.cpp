@@ -46,6 +46,10 @@ Json::Value get_user_data(){
 	return result;
 }
 
+void generate_price(double *price,int size){
+
+}
+
 int main(){
 	httplib::Server svr;
 	svr.Get("/getUserData",[](const httplib::Request& req,httplib::Response& res){
