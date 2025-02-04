@@ -53,7 +53,7 @@ int main(){
 			res.set_content(data.toStyledString(),"application/json");
 	});
 	std::cout<<"Server started at http://localhost:8080"<<std::endl;
-	svr.listen("0.0.0.0",8080);
+	svr.listen("0.0.0.0",8888);
 	return 0;
 }
 
