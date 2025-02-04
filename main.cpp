@@ -4,6 +4,8 @@
 #include "cnf.h"
 #include "httplib.h"
 
+#define DATA_SIZE 100
+
 Json::Value get_user_data(){
 	Json::Value result;
 	MYSQL *conn;
@@ -51,6 +53,7 @@ void generate_price(double *price,int size){
 }
 
 int main(){
+	double price[DATA_SIZE];
 	httplib::Server svr;
 	svr.Get("/getUserData",[](const httplib::Request& req,httplib::Response& res){
 			Json::Value data = get_user_data();
