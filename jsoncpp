@@ -1,0 +1,1 @@
+g++ main.cpp -o shuwen-service -I/usr/include/jsoncpp -ljsoncpp -lmysqlclient
