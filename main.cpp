@@ -6,7 +6,7 @@
 
 #define DATA_SIZE 100
 
-const std::string videoFilePath = "video/123.mp4";
+const std::string videoFilePath = "123.mp4";
 
 Json::Value get_user_data(){
 	Json::Value result;
