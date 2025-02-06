@@ -27,11 +27,11 @@ void sendVideo(const httplib::Request& req,httplib::Response& res){
 	const size_t bufferSize = 1024 * 1024; // 1MB
 	char buffer[bufferSize];
 	while (videoFile.read(buffer,bufferSize)){
-		res.write(buffer,bufferSize);
+		// res.write(buffer,bufferSize);
 	}
 	size_t remaining = videoFile.gcount();
 	if (remaining > 0){
-		res.write(buffer,remaining);
+		// res.write(buffer,remaining);
 	}
 	videoFile.close();
 }
