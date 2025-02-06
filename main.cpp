@@ -30,12 +30,15 @@ Json::Value get_user_data(){
 	Json::Value users(Json::arrayValue);
 	while((row = mysql_fetch_row(res)) != NULL){
 		Json::Value user;
-		user["id"] = row[0]?row[0]:"";
-		user["username"] = row[1]?row[1]:"";
-		user["password"] = row[2]?row[2]:"";
-		user["phone"] = row[3]?row[3]:"";
-		user["created_at"] = row[4]?row[4]:"";
-		user["updated_at"] = row[5]?row[5]:"";
+		user["uid"] = row[0]?row[0]:"";
+		user["wechat_user_id"] = row[1]?row[1]:"";
+		user["account"] = row[2]?row[2]:"";
+		user["pwd"] = row[3]?row[3]:"";
+		user["real_name"] = row[4]?row[4]:"";
+		user["sex"] = row[5]?row[5]:"";
+		user["birthday"] = row[5]?row[5]:"";
+		user["card_id"] = row[5]?row[5]:"";
+		user["mark"] = row[5]?row[5]:"";
 		users.append(user);
 	}
 	result["status"] = "success";
