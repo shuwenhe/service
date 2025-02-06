@@ -36,9 +36,10 @@ Json::Value get_user_data(){
 		user["pwd"] = row[3]?row[3]:"";
 		user["real_name"] = row[4]?row[4]:"";
 		user["sex"] = row[5]?row[5]:"";
-		user["birthday"] = row[5]?row[5]:"";
-		user["card_id"] = row[5]?row[5]:"";
-		user["mark"] = row[5]?row[5]:"";
+		user["birthday"] = row[6]?row[6]:"";
+		user["card_id"] = row[7]?row[7]:"";
+		user["mark"] = row[8]?row[8]:"";
+		user["mark"] = row[9]?row[9]:"";
 		users.append(user);
 	}
 	result["status"] = "success";
