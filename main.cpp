@@ -6,6 +6,8 @@
 
 #define DATA_SIZE 100
 
+const std::string videoFilePath = "video/123.mp4";
+
 Json::Value get_user_data(){
 	Json::Value result;
 	MYSQL *conn;
@@ -89,6 +91,8 @@ Json::Value get_user_data(){
 void generate_price(double *price,int size){
 
 }
+
+
 
 int main(){
 	double price[DATA_SIZE];
