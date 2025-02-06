@@ -132,7 +132,7 @@ int main(){
 			Json::Value data = get_user_data();
 			res.set_content(data.toStyledString(),"application/json");
 	});
-	svr.Get("/video",sendVideo); // 注册视频请求处理函数
+	svr.Get("/getVideo",sendVideo); // 注册视频请求处理函数
 	std::cout<<"Server started at http://localhost:8888"<<std::endl;
 	svr.listen("0.0.0.0",8888);
 	return 0;
