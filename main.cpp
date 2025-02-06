@@ -3,10 +3,38 @@
 #include <json/json.h>
 #include "cnf.h"
 #include "httplib.h"
+#include <fstream>
 
 #define DATA_SIZE 100
 
 const std::string videoFilePath = "123.mp4";
+
+void sendVideo(const httplib::Request& req,httplib::Response& res){
+	std::ifstream videoFile(videoFilePath,std::ios::binary);
+	if(!videoFile){
+		res.status = 404;
+		res.set_content("Video file not found","text/plain");
+		return;
+	}
+	// 获取文件大小
+	videoFile.seekg(0,std::ios::end);
+	size_t fileSize = videoFile.tellg();
+	videoFile.seekg(0,std::ios::beg);
+	// 设置响应头
+	res.set_header("Content-Type","video/mp4");
+	res.set_header("Content-Length",std::to_string(fileSize).c_str());
+	// 流式传输视频文件
+	const size_t bufferSize = 1024 * 1024; // 1MB
+	char buffer[bufferSize];
+	while (videoFile.read(buffer,bufferSize)){
+		res.write(buffer,bufferSize);
+	}
+	size_t remaining = videoFile.gcount();
+	if (remaining > 0){
+		res.write(buffer,remaining);
+	}
+	videoFile.close();
+}
 
 Json::Value get_user_data(){
 	Json::Value result;
@@ -104,6 +132,7 @@ int main(){
 			Json::Value data = get_user_data();
 			res.set_content(data.toStyledString(),"application/json");
 	});
+	svr.Get("/video",sendVideo); // 注册视频请求处理函数
 	std::cout<<"Server started at http://localhost:8888"<<std::endl;
 	svr.listen("0.0.0.0",8888);
 	return 0;
