@@ -9,6 +9,10 @@
 
 const std::string videoFilePath = "123.mp4";
 
+void writeToResponse(httplib::Response& res,const char* buffer,size_t size){
+	res.body.append(buffer,size);
+}
+
 void sendVideo(const httplib::Request& req,httplib::Response& res){
 	std::ifstream videoFile(videoFilePath,std::ios::binary);
 	if(!videoFile){
@@ -27,11 +31,11 @@ void sendVideo(const httplib::Request& req,httplib::Response& res){
 	const size_t bufferSize = 1024 * 1024 * 1024; // 1MB
 	char buffer[bufferSize];
 	while (videoFile.read(buffer,bufferSize)){
-		res.write(buffer,bufferSize);
+		writeToResponse(res,buffer,bufferSize);
 	}
 	size_t remaining = videoFile.gcount();
 	if (remaining > 0){
-		res.write(buffer,remaining);
+		writeToResponse(res,buffer,remaining);
 	}
 	videoFile.close();
 }
