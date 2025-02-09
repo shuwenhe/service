@@ -24,7 +24,7 @@ void sendVideo(const httplib::Request& req,httplib::Response& res){
 	videoFile.seekg(0,std::ios::beg);
 	res.set_header("Content-Type","video/mp4");
 	res.set_header("Content-Length",std::to_string(fileSize).c_str());
-	const size_t bufferSize = 1024 * 1024; // 1MB
+	const size_t bufferSize = 1024 * 1024;
 	char buffer[bufferSize];
 	while (videoFile.read(buffer,bufferSize)){
 		writeToResponse(res,buffer,bufferSize);
