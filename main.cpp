@@ -92,7 +92,7 @@ int main(){
 			res.set_content(data.toStyledString(),"application/json");
 	});
 	svr.Get("/getVideo",sendVideo); 
-	std::cout<<"Server started at http://localhost:8888"<<std::endl;
-	svr.listen("0.0.0.0",8888);
+	std::cout<<"Server started at http://localhost:8080"<<std::endl;
+	svr.listen("0.0.0.0",8080);
 	return 0;
 }
