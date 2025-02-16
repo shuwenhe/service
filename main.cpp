@@ -28,8 +28,9 @@ void sendVideo(const httplib::Request& req, httplib::Response& res) {
     // Default headers
     res.set_header("Content-Type", "video/mp4");
     res.set_header("Content-Length", std::to_string(fileSize));
+    res.set_header("Cache-Control", "no-cache");  // Prevent caching issues
 
-    // Check for Range header for partial content requests
+    // Handle Range header for partial content requests
     std::string rangeHeader = req.get_header_value("Range");
     if (!rangeHeader.empty()) {
         // Extract range from the header
@@ -68,6 +69,7 @@ void sendVideo(const httplib::Request& req, httplib::Response& res) {
         }
     } else {
         // Send the full video file if no Range header is present
+        res.set_header("Content-Range", "bytes 0-" + std::to_string(fileSize - 1) + "/" + std::to_string(fileSize)); // For compatibility
         size_t bufferSize = 1024 * 1024; // Larger buffer for full file transfer
         char buffer[bufferSize];
         while (videoFile.read(buffer, bufferSize)) {
@@ -81,7 +83,6 @@ void sendVideo(const httplib::Request& req, httplib::Response& res) {
 
     videoFile.close();
 }
-
 Json::Value get_user_data(){
 	Json::Value result;
 	MYSQL *conn;
