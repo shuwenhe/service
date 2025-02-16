@@ -6,34 +6,80 @@
 #include <fstream>
 
 #define DATA_SIZE 100
-const std::string videoFilePath = "123.mp4";
+const std::string videoFilePath = "/video/20250216101801.mp4";
 
 void writeToResponse(httplib::Response& res,const char* buffer,size_t size){
 	res.body.append(buffer,size);
 }
 
-void sendVideo(const httplib::Request& req,httplib::Response& res){
-	std::ifstream videoFile(videoFilePath,std::ios::binary);
-	if(!videoFile){
-		res.status = 404;
-		res.set_content("Video file not found","text/plain");
-		return;
-	}
-	videoFile.seekg(0,std::ios::end);
-	size_t fileSize = videoFile.tellg();
-	videoFile.seekg(0,std::ios::beg);
-	res.set_header("Content-Type","video/mp4");
-	res.set_header("Content-Length",std::to_string(fileSize).c_str());
-	const size_t bufferSize = 1024 * 1024;
-	char buffer[bufferSize];
-	while (videoFile.read(buffer,bufferSize)){
-		writeToResponse(res,buffer,bufferSize);
-	}
-	size_t remaining = videoFile.gcount();
-	if (remaining > 0){
-		writeToResponse(res,buffer,remaining);
-	}
-	videoFile.close();
+// Function to handle sending video and supporting range requests
+void sendVideo(const httplib::Request& req, httplib::Response& res) {
+    std::ifstream videoFile(videoFilePath, std::ios::binary);
+    if (!videoFile) {
+        res.status = 404;
+        res.set_content("Video file not found", "text/plain");
+        return;
+    }
+
+    videoFile.seekg(0, std::ios::end);
+    size_t fileSize = videoFile.tellg();
+    videoFile.seekg(0, std::ios::beg);
+
+    // Default headers
+    res.set_header("Content-Type", "video/mp4");
+    res.set_header("Content-Length", std::to_string(fileSize));
+
+    // Check for Range header for partial content requests
+    std::string rangeHeader = req.get_header_value("Range");
+    if (!rangeHeader.empty()) {
+        // Extract range from the header
+        size_t startPos = rangeHeader.find("=") + 1;
+        size_t dashPos = rangeHeader.find("-");
+        size_t start = std::stoull(rangeHeader.substr(startPos, dashPos - startPos));
+
+        size_t end = fileSize - 1;
+        if (dashPos != std::string::npos && dashPos + 1 < rangeHeader.size()) {
+            end = std::stoull(rangeHeader.substr(dashPos + 1));
+        }
+
+        if (start >= fileSize) {
+            res.status = 416; // Range Not Satisfiable
+            res.set_content("Requested range is not satisfiable", "text/plain");
+            return;
+        }
+
+        // Set status and content length for partial content
+        res.status = 206; // Partial Content
+        res.set_header("Content-Range", "bytes " + std::to_string(start) + "-" + std::to_string(end) + "/" + std::to_string(fileSize));
+        res.set_header("Content-Length", std::to_string(end - start + 1));
+
+        // Seek to the start of the range
+        videoFile.seekg(start, std::ios::beg);
+        size_t bufferSize = 1024 * 16; // Smaller buffer size for better performance
+        char buffer[bufferSize];
+
+        // Send video content in chunks
+        size_t bytesToSend = end - start + 1;
+        while (bytesToSend > 0) {
+            size_t chunkSize = std::min(bytesToSend, bufferSize);
+            videoFile.read(buffer, chunkSize);
+            writeToResponse(res, buffer, chunkSize);
+            bytesToSend -= chunkSize;
+        }
+    } else {
+        // Send the full video file if no Range header is present
+        size_t bufferSize = 1024 * 1024; // Larger buffer for full file transfer
+        char buffer[bufferSize];
+        while (videoFile.read(buffer, bufferSize)) {
+            writeToResponse(res, buffer, bufferSize);
+        }
+        size_t remaining = videoFile.gcount();
+        if (remaining > 0) {
+            writeToResponse(res, buffer, remaining);
+        }
+    }
+
+    videoFile.close();
 }
 
 Json::Value get_user_data(){
