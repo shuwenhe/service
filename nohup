@@ -1,1 +1,1 @@
-nohup ./video_service > log 2>&1 &
+nohup ./video_service > service.log 2>&1 &

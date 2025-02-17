@@ -16,9 +16,9 @@ using namespace httplib;
 class VideoServer {
 private:
     fs::path base_path_;
-    const size_t CHUNK_SIZE = 8192;  // 8KB chunks
+    static constexpr size_t CHUNK_SIZE = 8192;  // 8KB chunks
 
-    // 获取当前时间戳
+    // Return current timestamp string.
     std::string get_current_timestamp() {
         auto now = std::chrono::system_clock::now();
         auto time = std::chrono::system_clock::to_time_t(now);
@@ -28,19 +28,18 @@ private:
         return oss.str();
     }
 
-    // 将日志写入控制台及 service.log 文件
+    // Write a log entry both to console and to service.log.
     void write_log(const std::string& log_entry) {
         std::cout << log_entry << std::endl;
         std::ofstream log_file("service.log", std::ios::app);
         if (log_file.is_open()) {
             log_file << log_entry << std::endl;
-            log_file.close();
         } else {
             std::cerr << "Failed to open service.log for writing." << std::endl;
         }
     }
 
-    // 请求日志
+    // Log the incoming request.
     void log_request(const Request& req) {
         std::string log_entry = "\n" + std::string(50, '=') + "\n"
                                 + "📥 REQUEST\n"
@@ -56,7 +55,7 @@ private:
         write_log(log_entry);
     }
 
-    // 响应日志
+    // Log the response details.
     void log_response(int status, const Headers& headers, size_t body_size) {
         std::string log_entry = "\n" + std::string(50, '=') + "\n"
                                 + "📤 RESPONSE\n"
@@ -72,7 +71,7 @@ private:
         write_log(log_entry);
     }
 
-    // 根据文件扩展名获取 MIME 类型
+    // Determine MIME type based on file extension.
     std::string get_mime_type(const fs::path& path) {
         std::string ext = path.extension().string();
         if (ext == ".mp4") return "video/mp4";
@@ -83,7 +82,7 @@ private:
         return "application/octet-stream";
     }
 
-    // 将 URL 路径转换为文件系统中的路径
+    // Translate the URL path into a filesystem path.
     fs::path translate_path(const std::string& path) {
         std::string clean_path = path;
         if (!clean_path.empty() && clean_path[0] == '/') {
@@ -92,7 +91,7 @@ private:
         return (base_path_ / clean_path).lexically_normal();
     }
 
-    // 处理 Range 请求
+    // --- RANGE REQUEST HANDLER ---
     void handle_range_request(const fs::path& filepath, const std::string& range_header,
                               uintmax_t filesize, const std::string& content_type,
                               Response& res) {
@@ -124,27 +123,40 @@ private:
         end = std::min(end, filesize - 1);
         size_t length = end - start + 1;
 
-        // 设置响应头
+        // Set necessary headers.
         res.status = 206;
         res.set_header("Accept-Ranges", "bytes");
         res.set_header("Content-Range", "bytes " + std::to_string(start) + "-" +
                                            std::to_string(end) + "/" + std::to_string(filesize));
         res.set_header("Content-Length", std::to_string(length));
         res.set_header("Content-Type", content_type);
+        // Optionally force connection close so that AVPlayer re-requests data.
+        res.set_header("Connection", "close");
 
-        // 使用 content_provider 实现分块传输
+        // Open the file once.
+        auto file_ptr = std::make_shared<std::ifstream>(filepath, std::ios::binary);
+        if (!file_ptr || !file_ptr->is_open()) {
+            res.status = 500;
+            res.set_content("Failed to open file", "text/plain");
+            return;
+        }
+        // Seek to the beginning of the requested range.
+        file_ptr->clear();
+        file_ptr->seekg(start, std::ios::beg);
+
+        // Use a persistent stream in the content provider lambda.
         res.set_content_provider(
             length,
             content_type,
-            [filepath, start](size_t offset, size_t chunk_length, DataSink& sink) {
+            [file_ptr, start](size_t offset, size_t chunk_length, DataSink& sink) {
                 static thread_local std::vector<char> buffer(CHUNK_SIZE);
-                std::ifstream file(filepath, std::ios::binary);
-                if (!file) return false;
-                file.seekg(start + offset, std::ios::beg);
-                if (file.fail()) return false;
+                // Ensure we clear any eof flags.
+                file_ptr->clear();
+                // Position the stream to the current offset.
+                file_ptr->seekg(start + offset, std::ios::beg);
                 size_t to_read = std::min(chunk_length, buffer.size());
-                file.read(buffer.data(), to_read);
-                size_t bytes_read = file.gcount();
+                file_ptr->read(buffer.data(), to_read);
+                size_t bytes_read = file_ptr->gcount();
                 if (bytes_read == 0) return false;
                 return sink.write(buffer.data(), bytes_read);
             }
@@ -153,16 +165,17 @@ private:
         log_response(res.status, res.headers, length);
     }
 
-    // 处理完整文件传输
+    // --- FULL FILE HANDLER ---
     void serve_full_file(const fs::path& filepath, uintmax_t filesize,
                          const std::string& content_type, Response& res) {
         res = Response();
         res.set_header("Content-Type", content_type);
         res.set_header("Content-Length", std::to_string(filesize));
         res.set_header("Accept-Ranges", "bytes");
+        // Optionally force connection close.
+        res.set_header("Connection", "close");
         res.status = 200;
 
-        // 使用 shared_ptr 保持 ifstream 对象的生命周期
         auto file_ptr = std::make_shared<std::ifstream>(filepath, std::ios::binary);
         if (!file_ptr || !file_ptr->is_open()) {
             res.status = 500;
@@ -175,7 +188,8 @@ private:
             content_type,
             [file_ptr](size_t offset, size_t chunk_length, DataSink& sink) {
                 static thread_local std::vector<char> buffer(CHUNK_SIZE);
-                if (!file_ptr->seekg(offset, std::ios::beg)) return false;
+                file_ptr->clear();
+                file_ptr->seekg(offset, std::ios::beg);
                 size_t to_read = std::min(chunk_length, buffer.size());
                 file_ptr->read(buffer.data(), to_read);
                 size_t bytes_read = file_ptr->gcount();
@@ -188,10 +202,10 @@ private:
     }
 
 public:
-    explicit VideoServer(const std::string& base_path) 
+    explicit VideoServer(const std::string& base_path)
         : base_path_(fs::absolute(base_path)) {}
 
-    // 处理请求入口
+    // Main request handler. (Also handles HEAD requests internally.)
     void operator()(const Request& req, Response& res) {
         log_request(req);
         res = Response();
@@ -210,7 +224,6 @@ public:
             res.set_content("File not found", "text/plain");
             return;
         }
-
         if (fs::is_directory(filepath)) {
             res.status = 404;
             res.set_content("Directories not supported", "text/plain");
@@ -219,12 +232,25 @@ public:
 
         uintmax_t filesize = fs::file_size(filepath);
         std::string content_type = get_mime_type(filepath);
+        bool is_head = (req.method == "HEAD");
 
         if (req.has_header("Range")) {
             handle_range_request(filepath, req.get_header_value("Range"),
                                  filesize, content_type, res);
+            if (is_head) {
+                // For HEAD, clear body.
+                res.body.clear();
+            }
         } else {
-            serve_full_file(filepath, filesize, content_type, res);
+            if (is_head) {
+                res.set_header("Content-Type", content_type);
+                res.set_header("Content-Length", std::to_string(filesize));
+                res.set_header("Accept-Ranges", "bytes");
+                res.status = 200;
+                log_response(res.status, res.headers, 0);
+            } else {
+                serve_full_file(filepath, filesize, content_type, res);
+            }
         }
     }
 };
@@ -234,7 +260,7 @@ int main(int argc, char* argv[]) {
         std::string base_path = "/videos";
         int port = 8080;
 
-        // 简单解析命令行参数
+        // Simple command-line parsing.
         for (int i = 1; i < argc; i++) {
             std::string arg = argv[i];
             if (arg == "--port" && i + 1 < argc) {
@@ -247,11 +273,8 @@ int main(int argc, char* argv[]) {
         Server server;
         auto handler = std::make_shared<VideoServer>(base_path);
 
-        // 同时注册 GET、HEAD 和 OPTIONS 请求
+        // Register GET and OPTIONS. (HEAD requests are handled by the same GET handler.)
         server.Get(".*", [handler](const Request& req, Response& res) {
-            (*handler)(req, res);
-        });
-        server.Head(".*", [handler](const Request& req, Response& res) {
             (*handler)(req, res);
         });
         server.Options(".*", [handler](const Request& req, Response& res) {
