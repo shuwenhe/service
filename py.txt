@@ -1,0 +1,141 @@
+Serving videos from /videos on port 8080
+Access videos at http://localhost:8080/
+
+==================================================
+📥 REQUEST
+==================================================
+Method: GET
+Path: /mov_bbb.mp4
+
+Headers:
+  Connection: Upgrade
+  Host: xstiku.com
+  REMOTE-HOST: 111.202.154.3
+  X-Forwarded-For: 111.202.154.3
+  X-Scheme: https
+  accept: */*
+  accept-encoding: identity
+  accept-language: en-US,en;q=0.9
+  range: bytes=0-1
+  user-agent: AppleCoreMedia/1.0.0.22C150 (iPhone; U; CPU OS 18_2 like Mac OS X; en_us)
+  x-playback-session-id: BDF8FF33-2357-4698-A3AA-327991D89851
+==================================================
+
+172.18.0.4 - - [17/Feb/2025 15:49:04] "GET /mov_bbb.mp4 HTTP/1.1" 206 -
+
+==================================================
+📤 RESPONSE
+==================================================
+Status: 206
+
+Headers:
+  Content-Type: video/mp4
+  Content-Length: 2
+  Content-Range: bytes 0-1/788493
+  Accept-Ranges: bytes
+==================================================
+
+
+==================================================
+📥 REQUEST
+==================================================
+Method: GET
+Path: /mov_bbb.mp4
+
+Headers:
+  Connection: Upgrade
+  Host: xstiku.com
+  REMOTE-HOST: 111.202.154.3
+  X-Forwarded-For: 111.202.154.3
+  X-Scheme: https
+  accept: */*
+  accept-encoding: identity
+  accept-language: en-US,en;q=0.9
+  range: bytes=0-788492
+  user-agent: AppleCoreMedia/1.0.0.22C150 (iPhone; U; CPU OS 18_2 like Mac OS X; en_us)
+  x-playback-session-id: BDF8FF33-2357-4698-A3AA-327991D89851
+==================================================
+
+172.18.0.4 - - [17/Feb/2025 15:49:04] "GET /mov_bbb.mp4 HTTP/1.1" 206 -
+
+==================================================
+📤 RESPONSE
+==================================================
+Status: 206
+
+Headers:
+  Content-Type: video/mp4
+  Content-Length: 788493
+  Content-Range: bytes 0-788492/788493
+  Accept-Ranges: bytes
+==================================================
+
+
+==================================================
+📥 REQUEST
+==================================================
+Method: GET
+Path: /mov_bbb.mp4
+
+Headers:
+  Connection: Upgrade
+  Host: xstiku.com
+  REMOTE-HOST: 111.202.154.3
+  X-Forwarded-For: 111.202.154.3
+  X-Scheme: https
+  accept: */*
+  accept-encoding: identity
+  accept-language: en-US,en;q=0.9
+  range: bytes=770048-788492
+  user-agent: AppleCoreMedia/1.0.0.22C150 (iPhone; U; CPU OS 18_2 like Mac OS X; en_us)
+  x-playback-session-id: BDF8FF33-2357-4698-A3AA-327991D89851
+==================================================
+
+172.18.0.4 - - [17/Feb/2025 15:49:04] "GET /mov_bbb.mp4 HTTP/1.1" 206 -
+
+==================================================
+📤 RESPONSE
+==================================================
+Status: 206
+
+Headers:
+  Content-Type: video/mp4
+  Content-Length: 18445
+  Content-Range: bytes 770048-788492/788493
+  Accept-Ranges: bytes
+==================================================
+
+
+==================================================
+📥 REQUEST
+==================================================
+Method: GET
+Path: /mov_bbb.mp4
+
+Headers:
+  Connection: Upgrade
+  Host: xstiku.com
+  REMOTE-HOST: 111.202.154.3
+  X-Forwarded-For: 111.202.154.3
+  X-Scheme: https
+  accept: */*
+  accept-encoding: identity
+  accept-language: en-US,en;q=0.9
+  range: bytes=32533-770047
+  user-agent: AppleCoreMedia/1.0.0.22C150 (iPhone; U; CPU OS 18_2 like Mac OS X; en_us)
+  x-playback-session-id: BDF8FF33-2357-4698-A3AA-327991D89851
+==================================================
+
+172.18.0.4 - - [17/Feb/2025 15:49:05] "GET /mov_bbb.mp4 HTTP/1.1" 206 -
+
+==================================================
+📤 RESPONSE
+==================================================
+Status: 206
+
+Headers:
+  Content-Type: video/mp4
+  Content-Length: 737515
+  Content-Range: bytes 32533-770047/788493
+  Accept-Ranges: bytes
+==================================================

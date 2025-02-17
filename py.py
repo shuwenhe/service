@@ -8,6 +8,28 @@ class MyHandler(http.server.SimpleHTTPRequestHandler):
     def do_GET(self):
         filepath = self.translate_path(self.path)
 
+        # Improved request log with clear formatting
+        print("\n" + "="*50)
+        print("📥 REQUEST")
+        print("="*50)
+        print(f"Method: {self.command}")
+        print(f"Path: {self.path}")
+        print("\nHeaders:")
+        for key, val in sorted(self.headers.items()):
+            print(f"  {key}: {val}")
+        print("="*50 + "\n")
+
+        # Helper function for response logging
+        def log_response(status_code,headers):
+            print("\n" + "="*50)
+            print("📤 RESPONSE")
+            print("="*50)
+            print(f"Status: {status_code}")
+            print("\nHeaders:")
+            for key, val in headers.items():
+                print(f"  {key}: {val}")
+            print("="*50 + "\n")
+
         if os.path.isfile(filepath):
             try:
                 content_type, _ = mimetypes.guess_type(filepath)
@@ -38,6 +60,9 @@ class MyHandler(http.server.SimpleHTTPRequestHandler):
                             self.send_header("Accept-Ranges", "bytes")
                             self.end_headers()
 
+                            headers = {"Content-Type": content_type, "Content-Length": str(length), "Content-Range": f"bytes {start}-{end}/{filesize}", "Accept-Ranges": "bytes"}
+                            log_response(206,headers)  # Log partial content response
+
                             f.seek(start)
                             chunk_size = 8192
                             bytes_sent = 0
@@ -58,7 +83,10 @@ class MyHandler(http.server.SimpleHTTPRequestHandler):
                         self.send_header("Content-Length", str(filesize))
                         self.send_header("Accept-Ranges", "bytes")
                         self.end_headers()
-
+                        
+                        headers = {"Content-Type": content_type, "Content-Length": str(filesize), "Accept-Ranges": "bytes"}
+                        log_response(200,headers)  # Log success response
+                        
                         chunk_size = 8192
                         while True:
                             chunk = f.read(chunk_size)

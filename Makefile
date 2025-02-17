@@ -10,12 +10,12 @@ all: help
 
 build:
 	@echo "Building service..."
-	$(CXX) $(CXXFLAGS) -o $(TARGET) $(SRC) $(LIBS) -static-libstdc++
+	$(CXX) $(CXXFLAGS) -o $(TARGET) $(SRC) $(LIBS)
 
 run: build
 	@echo "Starting service..."
-	@./$(TARGET) --port 8080 --path /videos > service.log 2>&1 & \
-		echo $$! > service.pid
+	@./$(TARGET) --path /videos --port 8080
+		
 
 stop:
 	@echo "Stopping service..."
