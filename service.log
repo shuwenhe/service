@@ -2,132 +2,137 @@
 ==================================================
 📥 REQUEST
 ==================================================
-Timestamp: 2025-02-17 16:55:30
+Timestamp: 2025-02-17 17:51:21
 Method: GET
-Path: /mov_bbb.mp4
+Path: /
 
 Headers:
-  Connection: Upgrade
-  accept-language: en-US,en;q=0.9
-  Host: xstiku.com
-  range: bytes=0-1
-  X-Scheme: https
-  X-Forwarded-For: 111.202.154.3
-  REMOTE-HOST: 111.202.154.3
+  REMOTE_ADDR: 220.135.169.108
   LOCAL_ADDR: 172.28.87.164
-  accept: */*
-  x-playback-session-id: 2E64580F-06EB-4649-B6E5-106F3A47721C
-  accept-encoding: identity
-  REMOTE_PORT: 52254
-  user-agent: AppleCoreMedia/1.0.0.22C150 (iPhone; U; CPU OS 18_2 like Mac OS X; en_us)
-  LOCAL_PORT: 8080
-  REMOTE_ADDR: 172.18.0.4
-==================================================
-
-
-
-==================================================
-📤 RESPONSE
-==================================================
-Timestamp: 2025-02-17 16:55:30
-Status: 206
-
-Headers:
-  Content-Type: video/mp4
-  Content-Type: video/mp4
-  Content-Length: 2
-  Content-Range: bytes 0-1/788493
-  Accept-Ranges: bytes
-Body size: 2 bytes
-==================================================
-
-
-
-==================================================
-📥 REQUEST
-==================================================
-Timestamp: 2025-02-17 16:56:43
-Method: GET
-Path: /mov_bbb.mp4
-
-Headers:
-  Connection: Upgrade
-  accept-language: en-US,en;q=0.9
-  Host: xstiku.com
-  range: bytes=0-1
-  X-Scheme: https
-  X-Forwarded-For: 111.202.154.3
-  REMOTE-HOST: 111.202.154.3
-  LOCAL_ADDR: 172.28.87.164
-  accept: */*
-  x-playback-session-id: 53F3E473-B009-44DB-9593-D5A0FC0CB32A
-  accept-encoding: identity
-  REMOTE_PORT: 44016
-  user-agent: AppleCoreMedia/1.0.0.22C150 (iPhone; U; CPU OS 18_2 like Mac OS X; en_us)
-  LOCAL_PORT: 8080
-  REMOTE_ADDR: 172.18.0.4
-==================================================
-
-
-
-==================================================
-📤 RESPONSE
-==================================================
-Timestamp: 2025-02-17 16:56:43
-Status: 206
-
-Headers:
-  Content-Type: video/mp4
-  Content-Type: video/mp4
-  Content-Length: 2
-  Content-Range: bytes 0-1/788493
-  Accept-Ranges: bytes
-Body size: 2 bytes
-==================================================
-
-
-
-==================================================
-📥 REQUEST
-==================================================
-Timestamp: 2025-02-17 17:03:05
-Method: GET
-Path: /mov_bbb.mp4
-
-Headers:
-  Connection: Upgrade
-  accept-language: en-US,en;q=0.9
-  Host: xstiku.com
-  range: bytes=0-1
-  X-Scheme: https
-  X-Forwarded-For: 111.202.154.3
-  REMOTE-HOST: 111.202.154.3
-  LOCAL_ADDR: 172.28.87.164
-  accept: */*
-  x-playback-session-id: AF46D54E-389A-4715-8EF7-072B437C6539
-  accept-encoding: identity
-  REMOTE_PORT: 36708
-  user-agent: AppleCoreMedia/1.0.0.22C150 (iPhone; U; CPU OS 18_2 like Mac OS X; en_us)
-  LOCAL_PORT: 8080
-  REMOTE_ADDR: 172.18.0.4
-==================================================
-
-
-
-==================================================
-📤 RESPONSE
-==================================================
-Timestamp: 2025-02-17 17:03:05
-Status: 206
-
-Headers:
-  Content-Type: video/mp4
-  Content-Type: video/mp4
-  Content-Length: 2
-  Content-Range: bytes 0-1/788493
   Connection: close
-  Accept-Ranges: bytes
-Body size: 2 bytes
+  REMOTE_PORT: 41472
+  Accept: */*
+  Host: 39.107.59.4:8080
+  LOCAL_PORT: 8080
+  User-Agent: curl/7.88.1
 ==================================================
 
 
+DEBUG: Translated filepath: /videos/
+DEBUG: Directory not supported: /videos/
+
+==================================================
+📥 REQUEST
+==================================================
+Timestamp: 2025-02-17 17:52:10
+Method: GET
+Path: /mov_bbb.mp4
+
+Headers:
+  Connection: Upgrade
+  accept-language: en-US,en;q=0.9
+  Host: xstiku.com
+  range: bytes=0-1
+  X-Scheme: https
+  X-Forwarded-For: 111.202.154.3
+  REMOTE-HOST: 111.202.154.3
+  LOCAL_ADDR: 172.28.87.164
+  accept: */*
+  x-playback-session-id: 1048B0FE-1BE3-4A65-ADB9-7900FC121D3C
+  accept-encoding: identity
+  REMOTE_PORT: 48168
+  user-agent: AppleCoreMedia/1.0.0.22C150 (iPhone; U; CPU OS 18_2 like Mac OS X; en_us)
+  LOCAL_PORT: 8080
+  REMOTE_ADDR: 172.18.0.4
+==================================================
+
+
+DEBUG: Translated filepath: /videos/mov_bbb.mp4
+DEBUG: File size: 788493
+DEBUG: Request contains Range header.
+DEBUG: Handling Range request. Header: bytes=0-1
+DEBUG: Original range: start=0 end=1 length=2
+DEBUG: Adjusted range to meet minimum chunk size: start=0 end=1023
+DEBUG: Opened file and seeked to start: 0
+
+==================================================
+📤 RESPONSE
+==================================================
+Timestamp: 2025-02-17 17:52:10
+Status: 206
+
+Headers:
+  Content-Type: video/mp4
+  Content-Type: video/mp4
+  Content-Length: 1024
+  Content-Range: bytes 0-1023/788493
+  Accept-Ranges: bytes
+Body size: 1024 bytes
+==================================================
+
+
+
+==================================================
+📥 REQUEST
+==================================================
+Timestamp: 2025-02-17 17:54:16
+Method: GET
+Path: /
+
+Headers:
+  LOCAL_PORT: 8080
+  LOCAL_ADDR: 172.28.87.164
+  REMOTE_PORT: 46216
+  REMOTE_ADDR: 193.68.89.51
+  Host: 39.107.59.4:8080
+==================================================
+
+
+DEBUG: Translated filepath: /videos/
+DEBUG: Directory not supported: /videos/
+
+==================================================
+📥 REQUEST
+==================================================
+Timestamp: 2025-02-17 17:55:57
+Method: GET
+Path: /
+
+Headers:
+  REMOTE_ADDR: 46.19.143.58
+  Host: 39.107.59.4:8080
+  Content-Type: application/x-www-form-urlencoded; charset=UTF-8
+  X-Requested-With: XMLHttpRequest
+  LOCAL_ADDR: 172.28.87.164
+  Accept-Language: en US,en;q=0.9,sv;q=0.8
+  Connection: keep-alive
+  REMOTE_PORT: 50714
+  Accept: */*
+  Accept-Encoding: gzip, deflate
+  Accept-Encoding: gzip, deflate
+  LOCAL_PORT: 8080
+  User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.85 Safari/537.36 Edg/90.0.818.46
+==================================================
+
+
+DEBUG: Translated filepath: /videos/
+DEBUG: Directory not supported: /videos/
+
+==================================================
+📥 REQUEST
+==================================================
+Timestamp: 2025-02-17 17:56:11
+Method: GET
+Path: /
+
+Headers:
+  LOCAL_PORT: 8080
+  LOCAL_ADDR: 172.28.87.164
+  REMOTE_PORT: 36364
+  REMOTE_ADDR: 46.19.143.26
+  Host: 39.107.59.4:8080
+==================================================
+
+
+DEBUG: Translated filepath: /videos/
+DEBUG: Directory not supported: /videos/
