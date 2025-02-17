@@ -1,6 +1,3 @@
-Serving videos from /videos on port 8080
-Access videos at http://localhost:8080/
-
 ==================================================
 📥 REQUEST
 ==================================================
@@ -18,10 +15,10 @@ Headers:
   accept-language: en-US,en;q=0.9
   range: bytes=0-1
   user-agent: AppleCoreMedia/1.0.0.22C150 (iPhone; U; CPU OS 18_2 like Mac OS X; en_us)
-  x-playback-session-id: BDF8FF33-2357-4698-A3AA-327991D89851
+  x-playback-session-id: 4DE3C0D4-3AC6-4A0A-9201-5AF1D2AC802C
 ==================================================
 
-172.18.0.4 - - [17/Feb/2025 15:49:04] "GET /mov_bbb.mp4 HTTP/1.1" 206 -
+172.18.0.4 - - [17/Feb/2025 15:58:44] "GET /mov_bbb.mp4 HTTP/1.1" 206 -
 
 ==================================================
 📤 RESPONSE
@@ -33,6 +30,7 @@ Headers:
   Content-Length: 2
   Content-Range: bytes 0-1/788493
   Accept-Ranges: bytes
+Body size: 2 bytes
 ==================================================
 
 
@@ -53,10 +51,10 @@ Headers:
   accept-language: en-US,en;q=0.9
   range: bytes=0-788492
   user-agent: AppleCoreMedia/1.0.0.22C150 (iPhone; U; CPU OS 18_2 like Mac OS X; en_us)
-  x-playback-session-id: BDF8FF33-2357-4698-A3AA-327991D89851
+  x-playback-session-id: 4DE3C0D4-3AC6-4A0A-9201-5AF1D2AC802C
 ==================================================
 
-172.18.0.4 - - [17/Feb/2025 15:49:04] "GET /mov_bbb.mp4 HTTP/1.1" 206 -
+172.18.0.4 - - [17/Feb/2025 15:58:44] "GET /mov_bbb.mp4 HTTP/1.1" 206 -
 
 ==================================================
 📤 RESPONSE
@@ -68,6 +66,7 @@ Headers:
   Content-Length: 788493
   Content-Range: bytes 0-788492/788493
   Accept-Ranges: bytes
+Body size: 788493 bytes
 ==================================================
 
 
@@ -88,10 +87,10 @@ Headers:
   accept-language: en-US,en;q=0.9
   range: bytes=770048-788492
   user-agent: AppleCoreMedia/1.0.0.22C150 (iPhone; U; CPU OS 18_2 like Mac OS X; en_us)
-  x-playback-session-id: BDF8FF33-2357-4698-A3AA-327991D89851
+  x-playback-session-id: 4DE3C0D4-3AC6-4A0A-9201-5AF1D2AC802C
 ==================================================
 
-172.18.0.4 - - [17/Feb/2025 15:49:04] "GET /mov_bbb.mp4 HTTP/1.1" 206 -
+172.18.0.4 - - [17/Feb/2025 15:58:44] "GET /mov_bbb.mp4 HTTP/1.1" 206 -
 
 ==================================================
 📤 RESPONSE
@@ -103,6 +102,7 @@ Headers:
   Content-Length: 18445
   Content-Range: bytes 770048-788492/788493
   Accept-Ranges: bytes
+Body size: 18445 bytes
 ==================================================
 
 
@@ -121,12 +121,12 @@ Headers:
   accept: */*
   accept-encoding: identity
   accept-language: en-US,en;q=0.9
-  range: bytes=32533-770047
+  range: bytes=16167-770047
   user-agent: AppleCoreMedia/1.0.0.22C150 (iPhone; U; CPU OS 18_2 like Mac OS X; en_us)
-  x-playback-session-id: BDF8FF33-2357-4698-A3AA-327991D89851
+  x-playback-session-id: 4DE3C0D4-3AC6-4A0A-9201-5AF1D2AC802C
 ==================================================
 
-172.18.0.4 - - [17/Feb/2025 15:49:05] "GET /mov_bbb.mp4 HTTP/1.1" 206 -
+172.18.0.4 - - [17/Feb/2025 15:58:45] "GET /mov_bbb.mp4 HTTP/1.1" 206 -
 
 ==================================================
 📤 RESPONSE
@@ -135,7 +135,25 @@ Status: 206
 
 Headers:
   Content-Type: video/mp4
-  Content-Length: 737515
-  Content-Range: bytes 32533-770047/788493
+  Content-Length: 753881
+  Content-Range: bytes 16167-770047/788493
   Accept-Ranges: bytes
+Body size: 753881 bytes
+==================================================
+
+
+==================================================
+📥 REQUEST
+==================================================
+Method: GET
+Path: /
+
+Headers:
+  Accept-Encoding: gzip, x-gzip, deflate
+  Connection: Upgrade
+  Host: xstiku.com
+  REMOTE-HOST: 113.215.189.185
+  User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.7909.114 Safari/537.36
+  X-Forwarded-For: 113.215.189.185
+  X-Scheme: https
 ==================================================

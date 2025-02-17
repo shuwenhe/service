@@ -1,6 +1,9 @@
-[Request]
+==================================================
+📥 REQUEST
+==================================================
 Method: GET
 Path: /mov_bbb.mp4
+
 Headers:
   Connection: Upgrade
   accept-language: en-US,en;q=0.9
@@ -11,22 +14,25 @@ Headers:
   REMOTE-HOST: 111.202.154.3
   LOCAL_ADDR: 172.28.87.164
   accept: */*
-  x-playback-session-id: 4673375D-EB51-4743-AA68-60AEE7DAB2AE
+  x-playback-session-id: 9B0A908B-A7C2-4B0C-826B-38389B3E09D7
   accept-encoding: identity
-  REMOTE_PORT: 41894
+  REMOTE_PORT: 58288
   user-agent: AppleCoreMedia/1.0.0.22C150 (iPhone; U; CPU OS 18_2 like Mac OS X; en_us)
   LOCAL_PORT: 8080
   REMOTE_ADDR: 172.18.0.4
+==================================================
+
 filepath: "/videos/mov_bbb.mp4"
-[Response]
+
+==================================================
+📤 RESPONSE
+==================================================
 Status: 206
+
 Headers:
-  Content-Type: video/mp4
   Content-Length: 2
+  Content-Type: video/mp4
   Accept-Ranges: bytes
   Content-Range: bytes 0-1/788493
-  Access-Control-Expose-Headers: Content-Range
-  Access-Control-Allow-Methods: GET, HEAD, OPTIONS
-  Access-Control-Allow-Headers: Range
-  Access-Control-Allow-Origin: *
-Body size: 0 bytes
+Body size: 2 bytes
+==================================================

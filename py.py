@@ -20,7 +20,7 @@ class MyHandler(http.server.SimpleHTTPRequestHandler):
         print("="*50 + "\n")
 
         # Helper function for response logging
-        def log_response(status_code,headers):
+        def log_response(status_code,headers,bytes_sent):
             print("\n" + "="*50)
             print("📤 RESPONSE")
             print("="*50)
@@ -28,6 +28,7 @@ class MyHandler(http.server.SimpleHTTPRequestHandler):
             print("\nHeaders:")
             for key, val in headers.items():
                 print(f"  {key}: {val}")
+            print(f"Body size: {bytes_sent} bytes")
             print("="*50 + "\n")
 
         if os.path.isfile(filepath):
@@ -73,8 +74,8 @@ class MyHandler(http.server.SimpleHTTPRequestHandler):
 
 
                             headers = {"Content-Type": content_type, "Content-Length": str(length), "Content-Range": f"bytes {start}-{end}/{filesize}", "Accept-Ranges": "bytes"}
-                            
-                            log_response(206,headers)  # Log partial content response
+
+                            log_response(206,headers,bytes_sent)  # Log partial content response
 
 
                         else:
