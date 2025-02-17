@@ -1,0 +1,14 @@
+Starting video server on port 8080
+Serving content from: "/videos"
+Resolved path: "/videos/mov_bbb.mp4"
+Resolved path: "/videos/mov_bbb.mp4"
+Error 416 for /mov_bbb.mp4
+Resolved path: "/videos/mov_bbb.mp4"
+Resolved path: "/videos/mov_bbb.mp4"
+Resolved path: "/videos/mov_bbb.mp4"
+Resolved path: "/videos/videos/mov_bbb.mp4"
+Error 404 for /videos/mov_bbb.mp4
+Resolved path: "/videos/mov_bbb.mp4"
+Error 416 for /mov_bbb.mp4
+Resolved path: "/videos/favicon.ico"
+Error 404 for /favicon.ico

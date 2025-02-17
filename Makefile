@@ -1,5 +1,37 @@
+CXX = g++
+CXXFLAGS = -std=c++17 -Wall -Wextra -I.
+TARGET = video_service
+SRC = main.cpp
+LIBS = -lpthread -lstdc++fs
+
+.PHONY: all build run stop clean help
+
+all: help
+
 build:
-	# g++ main.cpp -o service -I/usr/include/jsoncpp -ljsoncpp -lmysqlclient
-	g++ main.cpp -o service -std=c++17 -lstdc++fs -lpthread -ldl
-run: 
-	./service
+	@echo "Building service..."
+	$(CXX) $(CXXFLAGS) -o $(TARGET) $(SRC) $(LIBS) -static-libstdc++
+
+run: build
+	@echo "Starting service..."
+	@./$(TARGET) --port 8080 --path /videos > service.log 2>&1 & \
+		echo $$! > service.pid
+
+stop:
+	@echo "Stopping service..."
+	@if [ -f service.pid ]; then \
+		kill -TERM $$(cat service.pid) 2>/dev/null || true; \
+		rm -f service.pid; \
+	fi
+
+clean:
+	@echo "Cleaning build artifacts..."
+	@rm -f $(TARGET) *.o
+
+help:
+	@echo "Service management commands:"
+	@echo "  make build    - Compile the service"
+	@echo "  make run      - Start the service in background"
+	@echo "  make stop     - Stop the running service"
+	@echo "  make clean    - Remove build artifacts"
+	@echo "  make help     - Show this help message"

@@ -1,68 +1,146 @@
-#include <iostream>
-#include <fstream>
-#include <string>
-#include <cstring>
 #include <filesystem>
-#include <regex>
-#include <sstream>
-#include <vector>
-#include <map>
-
-#ifdef _WIN32
-    #include <winsock2.h>
-    #include <ws2tcpip.h>
-    #pragma comment(lib, "ws2_32.lib")
-#else
-    #include <sys/socket.h>
-    #include <netinet/in.h>
-    #include <unistd.h>
-    #include <arpa/inet.h>
-#endif
+#include <iostream>
+#include <httplib.h>
 
 namespace fs = std::filesystem;
 
-class VideoServer {
-private:
-    const int PORT;
-    const std::string BASE_PATH;
-    int server_fd;
-
-    std::string getMimeType(const std::string& path) {
-        std::string ext = fs::path(path).extension().string();
-        if (ext == ".mp4") return "video/mp4";
-        if (ext == ".m4v") return "video/mp4";
-        if (ext == ".mov") return "video/quicktime";
-        return "video/mp4";
+class VideoStreamServer {
+public:
+    VideoStreamServer(int port, const std::string& base_path)
+        : port_(port), base_path_(fs::absolute(base_path)) {
+        init_server();
     }
 
-    std::string getFilePath(const std::string& path) {
-        // Remove URL parameters if any
-        std::string cleanPath = path;
-        size_t paramPos = cleanPath.find('?');
-        if (paramPos != std::string::npos) {
-            cleanPath = cleanPath.substr(0, paramPos);
+    void start() {
+        std::cout << "Starting video server on port " << port_ << "\n";
+        std::cout << "Serving content from: " << base_path_ << "\n";
+        server_.listen("0.0.0.0", port_);
+    }
+
+private:
+    void init_server() {
+        server_.set_error_handler([](const auto& req, auto& res) {
+            std::cerr << "Error " << res.status << " for " << req.path << "\n";
+        });
+
+        server_.Get(".*", [this](const httplib::Request& req, httplib::Response& res) {
+            try {
+                const auto full_path = resolve_path(req.path);
+                
+                if (!fs::exists(full_path)) {
+                    res.status = 404;
+                    res.set_content("File not found", "text/plain");
+                    return;
+                }
+
+                if (!fs::is_regular_file(full_path)) {
+                    res.status = 400;
+                    res.set_content("Invalid request", "text/plain");
+                    return;
+                }
+
+                const auto file_size = fs::file_size(full_path);
+                res.set_header("Content-Type", get_mime_type(full_path));
+                res.set_header("Accept-Ranges", "bytes");
+                res.set_header("Cache-Control", "no-store");
+
+                res.set_chunked_content_provider(
+                    get_mime_type(full_path),
+                    [this, full_path, file_size](size_t offset, httplib::DataSink& sink) {
+                        std::ifstream file(full_path, std::ios::binary);
+                        if (!file) return false;
+
+                        if (offset >= static_cast<size_t>(file_size)) {
+                            return false;
+                        }
+
+                        file.seekg(offset);
+                        const auto remaining = static_cast<size_t>(file_size) - offset;
+                        const size_t chunk_size = std::min(remaining, static_cast<size_t>(8192));
+
+                        std::vector<char> buffer(chunk_size);
+                        file.read(buffer.data(), chunk_size);
+                        
+                        if (file.gcount() > 0) {
+                            sink.write(buffer.data(), static_cast<size_t>(file.gcount()));
+                        }
+
+                        return true;
+                    },
+                    nullptr // Resource releaser
+                );
+            } catch (const std::exception& e) {
+                res.status = 500;
+                res.set_content("Server error", "text/plain");
+                std::cerr << "Error: " << e.what() << "\n";
+            }
+        });
+    }
+
+    std::string resolve_path(const std::string& request_path) const {
+        // URL decode and sanitize path
+        std::string decoded_path = url_decode(request_path);
+        
+        // Remove query parameters and fragments
+        const size_t query_start = decoded_path.find('?');
+        if (query_start != std::string::npos) {
+            decoded_path = decoded_path.substr(0, query_start);
         }
 
-        // Decode URL-encoded characters
-        cleanPath = urlDecode(cleanPath);
-
-        // Remove leading '/' and join with base path
-        if (!cleanPath.empty() && cleanPath[0] == '/') {
-            cleanPath = cleanPath.substr(1);
+        // Build filesystem path
+        fs::path request_fs_path = decoded_path;
+        if (request_fs_path.is_absolute()) {
+            request_fs_path = request_fs_path.relative_path();
         }
         
-        return fs::absolute(BASE_PATH + "/" + cleanPath).string();
+        std::cout << "Resolved path: " << (base_path_ / request_fs_path).lexically_normal() << "\n";
+        return (base_path_ / request_fs_path).lexically_normal();
     }
 
-    std::string urlDecode(const std::string& encoded) {
+    std::string get_mime_type(const std::string& path) const {
+        const std::string ext = fs::path(path).extension().string();
+        
+        // Common video MIME types
+        static const std::unordered_map<std::string, std::string> mime_types = {
+            {".mp4", "video/mp4"},
+            {".m4v", "video/mp4"},
+            {".mov", "video/quicktime"},
+            {".mkv", "video/x-matroska"},
+            {".webm", "video/webm"}
+        };
+
+        return mime_types.count(ext) ? mime_types.at(ext) : "video/mp4";
+    }
+
+    bool stream_file_chunk(const std::string& path, size_t offset, 
+                         httplib::DataSink& sink) const {
+        static std::mutex file_mutex;
+        std::lock_guard<std::mutex> lock(file_mutex);
+        
+        std::ifstream file(path, std::ios::binary | std::ios::ate);
+        if (!file) return false;
+
+        const auto file_size = file.tellg();
+        if (offset >= static_cast<size_t>(file_size)) {
+            return false; // Invalid range
+        }
+
+        file.seekg(offset);
+        const size_t remaining = file_size - offset;
+        const size_t chunk_size = std::min<size_t>(remaining, 8192);
+
+        std::vector<char> buffer(chunk_size);
+        file.read(buffer.data(), chunk_size);
+        
+        return sink.write(buffer.data(), file.gcount());
+    }
+
+    std::string url_decode(const std::string& encoded) const {
         std::string decoded;
-        for (size_t i = 0; i < encoded.length(); ++i) {
-            if (encoded[i] == '%' && i + 2 < encoded.length()) {
-                int value;
-                std::stringstream ss;
-                ss << std::hex << encoded.substr(i + 1, 2);
-                ss >> value;
-                decoded += static_cast<char>(value);
+        for (size_t i = 0; i < encoded.size(); ++i) {
+            if (encoded[i] == '%' && i + 2 < encoded.size()) {
+                const int hex_val = std::stoi(encoded.substr(i + 1, 2), nullptr, 16);
+                decoded += static_cast<char>(hex_val);
                 i += 2;
             } else if (encoded[i] == '+') {
                 decoded += ' ';
@@ -73,232 +151,30 @@ private:
         return decoded;
     }
 
-    std::map<std::string, std::string> parseHeaders(const std::string& request) {
-        std::map<std::string, std::string> headers;
-        std::istringstream stream(request);
-        std::string line;
-        
-        // Skip first line (request line)
-        std::getline(stream, line);
-        
-        while (std::getline(stream, line) && line != "\r") {
-            size_t colon = line.find(':');
-            if (colon != std::string::npos) {
-                std::string key = line.substr(0, colon);
-                std::string value = line.substr(colon + 2, line.length() - colon - 3);
-                headers[key] = value;
-            }
-        }
-        return headers;
-    }
-
-    void sendHeaders(int client_sock, int status, const std::string& contentType, 
-                    size_t start, size_t end, size_t filesize) {
-        std::string statusText;
-        switch (status) {
-            case 200: statusText = "OK"; break;
-            case 206: statusText = "Partial Content"; break;
-            case 404: statusText = "Not Found"; break;
-            case 416: statusText = "Requested Range Not Satisfiable"; break;
-            default: statusText = "Internal Server Error";
-        }
-
-        std::stringstream headers;
-        headers << "HTTP/1.1 " << status << " " << statusText << "\r\n"
-                << "Content-Type: " << contentType << "\r\n"
-                << "Accept-Ranges: bytes\r\n"
-                << "Content-Length: " << (end - start + 1) << "\r\n"
-                << "Content-Range: bytes " << start << "-" << end << "/" << filesize << "\r\n"
-                << "Connection: keep-alive\r\n"
-                << "Cache-Control: no-cache\r\n"
-                << "\r\n";
-
-        std::string headerStr = headers.str();
-        send(client_sock, headerStr.c_str(), headerStr.length(), 0);
-    }
-
-    void handleVideoRequest(int client_sock, const std::string& path, 
-                          const std::map<std::string, std::string>& headers) {
-        std::string filepath = getFilePath(path);
-        
-        if (!fs::exists(filepath)) {
-            sendHeaders(client_sock, 404, "text/plain", 0, 0, 0);
-            return;
-        }
-
-        std::ifstream file(filepath, std::ios::binary);
-        if (!file) {
-            sendHeaders(client_sock, 500, "text/plain", 0, 0, 0);
-            return;
-        }
-
-        // Get file size
-        file.seekg(0, std::ios::end);
-        size_t filesize = file.tellg();
-        file.seekg(0, std::ios::beg);
-
-        size_t start = 0;
-        size_t end = filesize - 1;
-        int status = 200;
-
-        // Handle range request
-        auto rangeIt = headers.find("Range");
-        if (rangeIt != headers.end()) {
-            std::regex rangeRegex(R"(bytes=(\d*)-(\d*))");
-            std::smatch matches;
-            if (std::regex_match(rangeIt->second, matches, rangeRegex)) {
-                if (!matches[1].str().empty()) {
-                    start = std::stoull(matches[1].str());
-                }
-                if (!matches[2].str().empty()) {
-                    end = std::stoull(matches[2].str());
-                }
-
-                if (start >= filesize) {
-                    sendHeaders(client_sock, 416, "text/plain", 0, 0, filesize);
-                    return;
-                }
-
-                end = std::min(end, filesize - 1);
-                status = 206;
-            }
-        }
-
-        // Send headers
-        sendHeaders(client_sock, status, getMimeType(filepath), start, end, filesize);
-
-        // Send file content
-        file.seekg(start);
-        std::vector<char> buffer(8192);
-        size_t remaining = end - start + 1;
-
-        while (remaining > 0 && file) {
-            size_t toRead = std::min(buffer.size(), remaining);
-            file.read(buffer.data(), toRead);
-            size_t bytesRead = file.gcount();
-            if (bytesRead == 0) break;
-
-            send(client_sock, buffer.data(), bytesRead, 0);
-            remaining -= bytesRead;
-        }
-
-        file.close();
-    }
-
-public:
-    VideoServer(int port, const std::string& basePath) 
-        : PORT(port), BASE_PATH(basePath) {}
-
-    void start() {
-        #ifdef _WIN32
-            WSADATA wsaData;
-            if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) {
-                throw std::runtime_error("WSAStartup failed");
-            }
-        #endif
-
-        server_fd = socket(AF_INET, SOCK_STREAM, 0);
-        if (server_fd < 0) {
-            throw std::runtime_error("Socket creation failed");
-        }
-
-        int opt = 1;
-        if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, 
-            (const char*)&opt, sizeof(opt))) {
-            throw std::runtime_error("Setsockopt failed");
-        }
-
-        struct sockaddr_in address;
-        address.sin_family = AF_INET;
-        address.sin_addr.s_addr = INADDR_ANY;
-        address.sin_port = htons(PORT);
-
-        if (bind(server_fd, (struct sockaddr*)&address, sizeof(address)) < 0) {
-            throw std::runtime_error("Bind failed");
-        }
-
-        if (listen(server_fd, 3) < 0) {
-            throw std::runtime_error("Listen failed");
-        }
-
-        std::cout << "Video server started on port " << PORT << std::endl;
-        std::cout << "Serving videos from: " << BASE_PATH << std::endl;
-
-        while (true) {
-            struct sockaddr_in client_addr;
-            socklen_t addrlen = sizeof(client_addr);
-            
-            int client_sock = accept(server_fd, (struct sockaddr*)&client_addr, &addrlen);
-            if (client_sock < 0) {
-                std::cerr << "Accept failed" << std::endl;
-                continue;
-            }
-
-            // Get client request
-            std::vector<char> buffer(4096);
-            std::string request;
-            
-            while (true) {
-                int bytesRead = recv(client_sock, buffer.data(), buffer.size(), 0);
-                if (bytesRead <= 0) break;
-                request.append(buffer.data(), bytesRead);
-                if (request.find("\r\n\r\n") != std::string::npos) break;
-            }
-
-            if (!request.empty()) {
-                // Parse request line
-                std::istringstream requestStream(request);
-                std::string requestLine;
-                std::getline(requestStream, requestLine);
-                
-                std::istringstream requestLineStream(requestLine);
-                std::string method, path, protocol;
-                requestLineStream >> method >> path >> protocol;
-
-                // Handle GET request
-                if (method == "GET") {
-                    auto headers = parseHeaders(request);
-                    handleVideoRequest(client_sock, path, headers);
-                }
-            }
-
-            #ifdef _WIN32
-                closesocket(client_sock);
-            #else
-                close(client_sock);
-            #endif
-        }
-    }
-
-    ~VideoServer() {
-        #ifdef _WIN32
-            closesocket(server_fd);
-            WSACleanup();
-        #else
-            close(server_fd);
-        #endif
-    }
+    int port_;
+    fs::path base_path_;
+    httplib::Server server_;
 };
 
 int main(int argc, char* argv[]) {
     try {
         int port = 8080;
-        std::string basePath = "/videos";
+        std::string base_path = "/videos";
 
         // Parse command line arguments
-        for (int i = 1; i < argc; i++) {
-            std::string arg = argv[i];
+        for (int i = 1; i < argc; ++i) {
+            const std::string arg = argv[i];
             if (arg == "--port" && i + 1 < argc) {
                 port = std::stoi(argv[++i]);
             } else if (arg == "--path" && i + 1 < argc) {
-                basePath = argv[++i];
+                base_path = argv[++i];
             }
         }
 
-        VideoServer server(port, basePath);
+        VideoStreamServer server(port, base_path);
         server.start();
     } catch (const std::exception& e) {
-        std::cerr << "Error: " << e.what() << std::endl;
+        std::cerr << "Fatal error: " << e.what() << "\n";
         return 1;
     }
     return 0;
