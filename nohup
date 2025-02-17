@@ -1,0 +1,1 @@
+nohup ./video_service > log 2>&1 &
