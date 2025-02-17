@@ -1,168 +1,117 @@
-#include <iostream>
+#include <httplib.h>
+#include <filesystem>
 #include <fstream>
-#include <string>
 #include <regex>
-#include <sstream>
-#include <sys/stat.h> // For stat
-#include <unistd.h>   // For access
+#include <iostream>
 
-#include "oatpp/web/server/HttpServer.hpp"
-#include "oatpp/network/tcp/server/TcpServer.hpp"
-#include "oatpp/web/protocol/http/v1/Request.hpp"
-#include "oatpp/web/protocol/http/v1/Response.hpp"
-#include "oatpp/core/macro/component.hpp"
-#include "oatpp/core/base/Environment.hpp"
-#include "oatpp/core/base/CommandLineArguments.hpp"
+namespace fs = std::filesystem;
+using namespace httplib;
 
-OATPP_COMPONENT(LoggerComponent)(oatpp::日志::Logger);
-
-class VideoServer : public oatpp::web::server::HttpRequestHandler {
+class VideoServer {
 private:
-  std::string m_basePath;
+    fs::path base_path_;
+    const size_t CHUNK_SIZE = 8192;
+
+    std::string get_mime_type(const fs::path& path) {
+        std::string ext = path.extension().string();
+        if (ext == ".mp4") return "video/mp4";
+        return "application/octet-stream";
+    }
+
+    fs::path translate_path(const std::string& path) {
+        std::string clean_path = path;
+        if (!clean_path.empty() && clean_path[0] == '/') {
+            clean_path = clean_path.substr(1);
+        }
+        return (base_path_ / clean_path).lexically_normal();
+    }
+
+    void handle_range_request(const fs::path& filepath, const std::string& range_header,
+                            uintmax_t filesize, const std::string& content_type,
+                            Response& res) {
+        std::regex range_regex(R"(bytes=(\d*)-(\d*))");
+        std::smatch matches;
+        if (!std::regex_match(range_header, matches, range_regex)) {
+            res.status = 400;
+            return;
+        }
+
+        size_t start = matches[1].str().empty() ? 0 : std::stoull(matches[1].str());
+        size_t end = matches[2].str().empty() ? filesize - 1 : std::stoull(matches[2].str());
+        end = std::min(end, filesize - 1);
+        size_t length = end - start + 1;
+
+        res.status = 206;
+        res.set_header("Content-Type", content_type);
+        res.set_header("Content-Length", std::to_string(length));
+        res.set_header("Content-Range", 
+            "bytes " + std::to_string(start) + "-" + 
+            std::to_string(end) + "/" + std::to_string(filesize));
+        res.set_header("Accept-Ranges", "bytes");
+
+        auto file = std::make_shared<std::ifstream>(filepath, std::ios::binary);
+        res.set_content_provider(
+            length,
+            content_type,
+            [file, start](size_t offset, size_t chunk_length, DataSink& sink) {
+                static thread_local std::vector<char> buffer(8192);
+                if (!file->seekg(start + offset)) return false;
+                size_t to_read = std::min(chunk_length, buffer.size());
+                file->read(buffer.data(), to_read);
+                size_t bytes_read = file->gcount();
+                if (bytes_read == 0) return false;
+                return sink.write(buffer.data(), bytes_read);
+            }
+        );
+    }
 
 public:
-  VideoServer(const std::string& basePath) : m_basePath(basePath) {}
+    explicit VideoServer(const std::string& base_path) 
+        : base_path_(fs::absolute(base_path)) {}
 
-  std::shared_ptr<oatpp::web::protocol::http::v1::Response> handle(const std::shared_ptr<oatpp::web::protocol::http::v1::Request>& request) override {
-    auto logger = OATPP_COMPONENT(LoggerComponent)::getLogger();
+    void operator()(const Request& req, Response& res) {
+        if (req.method == "OPTIONS") {
+            res.set_header("Allow", "GET, HEAD, OPTIONS");
+            res.status = 204;
+            return;
+        }
 
-    logger->info("==================================================");
-    logger->info("📥 REQUEST");
-    logger->info("==================================================");
-    logger->info("Method: {}", request->getMethod());
-    logger->info("Path: {}", request->getPath());
-    logger->info("");
-    logger->info("Headers:");
-    for (const auto& header : request->getHeaders()) {
-      logger->info("  {}: {}", header.first, header.second);
+        auto filepath = translate_path(req.path);
+        if (!fs::exists(filepath) || fs::is_directory(filepath)) {
+            res.status = 404;
+            return;
+        }
+
+        const auto filesize = fs::file_size(filepath);
+        const auto content_type = get_mime_type(filepath);
+
+        if (req.has_header("Range")) {
+            handle_range_request(filepath, req.get_header_value("Range"), 
+                               filesize, content_type, res);
+        } else {
+            res.set_header("Content-Type", content_type);
+            res.set_header("Content-Length", std::to_string(filesize));
+            res.set_header("Accept-Ranges", "bytes");
+            res.set_content_provider(
+                filesize,
+                content_type,
+                [filepath](size_t offset, size_t chunk_length, DataSink& sink) {
+                    static thread_local std::vector<char> buffer(8192);
+                    std::ifstream file(filepath, std::ios::binary);
+                    if (!file.seekg(offset)) return false;
+                    size_t to_read = std::min(chunk_length, buffer.size());
+                    file.read(buffer.data(), to_read);
+                    return sink.write(buffer.data(), file.gcount());
+                }
+            );
+        }
     }
-    logger->info("==================================================\n");
+};
 
-    if (request->getMethod() == "OPTIONS") {
-      auto response = oatpp::web::protocol::http::v1::Response::createShared(oatpp::web::protocol::http::v1::Status::CODE_204_NO_CONTENT);
-      response->putHeader("Allow", "GET, HEAD, OPTIONS");
-      return response;
-    }
-
-    std::string filePath = translatePath(request->getPath());
-    logger->info("filepath: {}", filePath);
-
-    struct stat fileInfo;
-    if (stat(filePath.c_str(), &fileInfo) != 0) {
-      return oatpp::web::protocol::http::v1::Response::createShared(oatpp::web::protocol::http::v1::Status::CODE_404_NOT_FOUND, "File not found");
-    }
-
-    if (S_ISDIR(fileInfo.st_mode)) {
-      return oatpp::web::protocol::http::v1::Response::createShared(oatpp::web::protocol::http::v1::Status::CODE_404_NOT_FOUND, "Directories not supported");
-    }
-
-    std::string contentType = getContentType(filePath);
-    long long fileSize = fileInfo.st_size;
-
-    auto rangeHeader = request->getHeader("Range");
-    if (rangeHeader.has_value()) {
-      return handleRangeRequest(request, filePath, rangeHeader.value(), fileSize, contentType);
-    } else {
-      return serveFullFile(filePath, fileSize, contentType);
-    }
-  }
-
-
-  std::shared_ptr<oatpp::web::protocol::http::v1::Response> handleRangeRequest(const std::shared_ptr<oatpp::web::protocol::http::v1::Request>& request, const std::string& filePath, const std::string& rangeHeader, long long fileSize, const std::string& contentType) {
-    auto logger = OATPP_COMPONENT(LoggerComponent)::getLogger();
-
-    std::regex re(R"(bytes=(\d*)-(\d*))");
-    std::smatch matches;
-    if (!std::regex_search(rangeHeader, matches, re)) {
-      return oatpp::web::protocol::http::v1::Response::createShared(oatpp::web::protocol::http::v1::Status::CODE_400_BAD_REQUEST, "Invalid Range header");
-    }
-
-    long long start = 0;
-    if (!matches[1].str().empty()) {
-      start = std::stoll(matches[1].str());
-    }
-
-    long long end = fileSize - 1;
-    if (!matches[2].str().empty()) {
-      end = std::stoll(matches[2].str());
-    }
-
-    if (start > end || start >= fileSize) {
-      auto response = oatpp::web::protocol::http::v1::Response::createShared(oatpp::web::protocol::http::v1::Status::CODE_416_REQUESTED_RANGE_NOT_SATISFIABLE, "Requested range not satisfiable");
-      response->putHeader("Content-Range", "bytes */" + std::to_string(fileSize));
-      return response;
-    }
-
-    long long length = end - start + 1;
-
-    auto response = oatpp::web::protocol::http::v1::Response::createShared(oatpp::web::protocol::http::v1::Status::CODE_206_PARTIAL_CONTENT);
-    response->putHeader("Content-Type", contentType);
-    response->putHeader("Content-Length", std::to_string(length));
-    response->putHeader("Content-Range", "bytes " + std::to_string(start) + "-" + std::to_string(end) + "/" + std::to_string(fileSize));
-    response->putHeader("Accept-Ranges", "bytes");
-
-    std::ifstream file(filePath, std::ios::binary);
-    if (!file.is_open()) {
-      return oatpp::web::protocol::http::v1::Response::createShared(oatpp::web::protocol::http::v1::Status::CODE_500_INTERNAL_SERVER_ERROR, "Failed to open file");
-    }
-    file.seekg(start);
-
-    std::vector<char> buffer(8192);
-    long long bytesSent = 0;
-
-    while (bytesSent < length) {
-      long long toRead = std::min((long long)buffer.size(), length - bytesSent);
-      file.read(buffer.data(), toRead);
-      auto bytesRead = file.gcount();
-      if (bytesRead <= 0) break;
-
-      response->writeBody(buffer.data(), bytesRead);
-      bytesSent += bytesRead;
-    }
-    file.close();
-
-    logger->info("==================================================");
-    logger->info("📤 RESPONSE");
-    logger->info("==================================================");
-    logger->info("Status: {}", response->getStatusCode());
-    logger->info("");
-    logger->info("Headers:");
-    for (const auto& header : response->getHeaders()) {
-      logger->info("  {}: {}", header.first, header.second);
-    }
-    logger->info("Body size: {} bytes\n", bytesSent);
-    logger->info("==================================================\n");
-
-    return response;
-  }
-
-  std::shared_ptr<oatpp::web::protocol::http::v1::Response> serveFullFile(const std::string& filePath, long long fileSize, const std::string& contentType) {
-    auto logger = OATPP_COMPONENT(LoggerComponent)::getLogger();
-
-    auto response = oatpp::web::protocol::http::v1::Response::createShared(oatpp::web::protocol::http::v1::Status::CODE_200_OK);
-    response->putHeader("Content-Type", contentType);
-    response->putHeader("Content-Length", std::to_string(fileSize));
-    response->putHeader("Accept-Ranges", "bytes");
-
-    std::ifstream file(filePath, std::ios::binary);
-    if (!file.is_open()) {
-      return oatpp::web::protocol::http::v1::Response::createShared(oatpp::web::protocol::http::v1::Status::CODE_500_INTERNAL_SERVER_ERROR, "Failed to open file");
-    }
-
-    std::vector<char> buffer(8192);
-    long long bytesSent = 0;
-
-    while (file.good()) {
-      file.read(buffer.data(), buffer.size());
-      auto bytesRead = file.gcount();
-
-      response->writeBody(buffer.data(), bytesRead);
-      bytesSent += bytesRead;
-    }
-
-    file.close();
-
-    logger->info("==================================================");
-    logger->info("📤 RESPONSE");
-    logger->info("==================================================");
-    logger->info("Status: {}", response
+int main(int argc, char* argv[]) {
+    Server svr;
+    auto handler = std::make_shared<VideoServer>("/videos");
+    svr.Get(".*", [handler](const Request& req, Response& res) { (*handler)(req, res); });
+    svr.listen("0.0.0.0", 8080);
+    return 0;
+}
