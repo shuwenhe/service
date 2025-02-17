@@ -1,4 +1,8 @@
+*.mp4
+*.log
+*.o
 cnf.h
 log
 123.mp4
 service
+video_service

@@ -162,19 +162,27 @@ private:
         }
 
         file.seekg(start);
+        const size_t chunk_size = 8192;  // Match Python's chunk size
         size_t length = end - start + 1;
-        std::vector<char> buffer(length);
-        
-        file.read(buffer.data(), length);
-        size_t bytes_read = file.gcount();
-        
-        if (bytes_read != length) {
+        size_t bytes_sent = 0;
+
+        std::vector<char> buffer(chunk_size);
+        while (bytes_sent < length) {
+            size_t to_read = std::min(chunk_size, length - bytes_sent);
+            file.read(buffer.data(), to_read);
+            size_t bytes_read = file.gcount();
+            
+            if (bytes_read == 0) break;  // EOF or error
+            
+            res.body.append(buffer.data(), bytes_read);
+            bytes_sent += bytes_read;
+        }
+
+        if (bytes_sent != length) {
             res.status = 500;
             res.set_content("File read error", "text/plain");
             return;
         }
-
-        res.set_content(buffer.data(), bytes_read, get_mime_type(filepath).c_str());
     }
 
     void serve_full_file(const fs::path& filepath, uintmax_t filesize,

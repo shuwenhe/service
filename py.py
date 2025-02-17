@@ -60,9 +60,7 @@ class MyHandler(http.server.SimpleHTTPRequestHandler):
                             self.send_header("Accept-Ranges", "bytes")
                             self.end_headers()
 
-                            headers = {"Content-Type": content_type, "Content-Length": str(length), "Content-Range": f"bytes {start}-{end}/{filesize}", "Accept-Ranges": "bytes"}
-                            log_response(206,headers)  # Log partial content response
-
+                    
                             f.seek(start)
                             chunk_size = 8192
                             bytes_sent = 0
@@ -72,6 +70,12 @@ class MyHandler(http.server.SimpleHTTPRequestHandler):
                                     break
                                 self.wfile.write(chunk)
                                 bytes_sent += len(chunk)
+
+
+                            headers = {"Content-Type": content_type, "Content-Length": str(length), "Content-Range": f"bytes {start}-{end}/{filesize}", "Accept-Ranges": "bytes"}
+                            
+                            log_response(206,headers)  # Log partial content response
+
 
                         else:
                             self.send_error(400, "Invalid Range header")  # Bad range format
